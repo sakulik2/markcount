@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self'; img-src 'self' data: blob:; font-src 'self'; script-src 'self'">
+<meta name="description" content="粘贴或打开 Markdown，实时渲染，并只统计真正的字：汉字逐字计，其他文字按词计，标记符号和链接地址不计。">
+<title>Markdown 字数</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<a class="skip" href="#main">跳到正文</a>
+<header class="bar">
+  <div class="container bar__in">
+    <h1 class="wordmark">Markdown 字数</h1>
+    <div class="keys" role="tablist" aria-label="视图">
+      <button type="button" class="key" role="tab" id="tab-editor" data-view="editor" aria-selected="true" aria-controls="view-editor">编辑器</button>
+      <button type="button" class="key" role="tab" id="tab-vault" data-view="vault" aria-selected="false" aria-controls="view-vault">本地仓库</button>
+    </div>
+    <details class="opts" id="opts">
+      <summary class="btn">统计范围</summary>
+      <div class="opts__panel">
+        <label class="check"><input type="checkbox" id="opt-code" checked> 计入代码块和行内代码</label>
+        <label class="check"><input type="checkbox" id="opt-fm"> 计入文件头部的属性块</label>
+        <label class="check"><input type="checkbox" id="opt-comment"> 计入注释</label>
+      </div>
+    </details>
+  </div>
+</header>
+
+<main id="main" class="container">
+  <noscript><p class="state__line">需要启用 JavaScript，才能渲染和统计。</p></noscript>
+
+  <section id="view-editor" class="view" role="tabpanel" aria-labelledby="tab-editor">
+    <div class="pane">
+      <div class="field">
+        <label class="field__label" for="src">Markdown 原文</label>
+        <textarea id="src" spellcheck="false" placeholder="在这里输入或粘贴 Markdown"></textarea>
+      </div>
+      <div class="field">
+        <span class="field__label" id="preview-label">渲染预览</span>
+        <div class="sheet" role="region" aria-labelledby="preview-label" tabindex="0">
+          <div id="preview" class="md"></div>
+          <div id="preview-empty" class="state">
+            <p class="state__line">左边写点什么，这里就会渲染。</p>
+            <p class="state__why">字数只算真正的字，标题符号、分隔线和链接地址都不计。</p>
+            <button type="button" id="sample" class="btn">载入一段示例</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="stat-editor" class="tally" role="status" aria-label="字数统计"></div>
+  </section>
+
+  <section id="view-vault" class="view" role="tabpanel" aria-labelledby="tab-vault" hidden>
+    <div class="tools">
+      <button type="button" id="pick" class="btn btn--primary">选择仓库文件夹</button>
+      <label class="btn" id="pick-fallback-label">备用：选择文件夹
+        <input type="file" id="pick-fallback" webkitdirectory multiple class="visually-hidden">
+      </label>
+      <div class="search">
+        <label class="visually-hidden" for="vault-search">按路径筛选</label>
+        <input type="search" id="vault-search" placeholder="例如 日记/2026" autocomplete="off">
+      </div>
+    </div>
+    <p id="vault-note" class="note">文件只在这台设备的浏览器里读取，不会上传。</p>
+
+    <div id="vault-status" class="status" role="status" hidden>
+      <progress id="vault-progress" max="100" value="0"></progress>
+      <span id="vault-status-text"></span>
+    </div>
+
+    <div id="vault-empty" class="state">
+      <p class="state__line">选一个文件夹，仓库里的笔记会列在这里。</p>
+      <p class="state__why">Obsidian 仓库就是一个普通文件夹。选中它，每篇 .md 笔记都会得到自己的字数，也能在右边直接读。</p>
+    </div>
+
+    <div id="vault-error" class="state state--error" role="alert" hidden>
+      <p class="state__line">没能读取这个文件夹。</p>
+      <p class="state__why" id="vault-error-msg"></p>
+    </div>
+
+    <div id="vault-body" class="vault" hidden>
+      <div id="vault-summary" class="tally" role="status" aria-label="仓库字数统计"></div>
+      <div class="listing">
+        <table id="vault-table">
+          <thead><tr>
+            <th data-sort="path" aria-sort="none"><button type="button" class="sortbtn">文件</button></th>
+            <th data-sort="total" class="num" aria-sort="none"><button type="button" class="sortbtn">字数</button></th>
+            <th data-sort="cjk" class="num" aria-sort="none"><button type="button" class="sortbtn">汉字</button></th>
+            <th data-sort="words" class="num" aria-sort="none"><button type="button" class="sortbtn">词</button></th>
+          </tr></thead>
+          <tbody id="vault-rows"></tbody>
+        </table>
+      </div>
+      <article class="sheet" aria-live="polite" tabindex="0">
+        <h2 id="vault-title" class="sheet__title">从左边选一篇笔记</h2>
+        <div id="vault-md" class="md"></div>
+      </article>
+    </div>
+  </section>
+</main>
+
+<script src="vendor/marked.umd.js"></script>
+<script src="vendor/purify.min.js"></script>
+<script src="count.js"></script>
+<script src="render.js"></script>
+<script src="vault.js"></script>
+<script src="vault-view.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
