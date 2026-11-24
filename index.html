@@ -34,11 +34,17 @@
   <section id="view-editor" class="view" role="tabpanel" aria-labelledby="tab-editor">
     <div class="pane">
       <div class="field">
-        <label class="field__label" for="src">Markdown 原文</label>
+        <div class="field__head">
+          <label class="field__label" for="src">Markdown 原文</label>
+          <span class="field__acts">
+            <button type="button" id="undo-clear" class="btn btn--small" hidden>撤销清空</button>
+            <button type="button" id="clear" class="btn btn--small" title="清空原文" disabled>清空</button>
+          </span>
+        </div>
         <textarea id="src" spellcheck="false" placeholder="在这里输入或粘贴 Markdown"></textarea>
       </div>
       <div class="field">
-        <span class="field__label" id="preview-label">渲染预览</span>
+        <div class="field__head"><span class="field__label" id="preview-label">渲染预览</span></div>
         <div class="sheet" role="region" aria-labelledby="preview-label" tabindex="0">
           <div id="preview" class="md"></div>
           <div id="preview-empty" class="state">

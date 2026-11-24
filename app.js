@@ -39,13 +39,39 @@
     } else {
       preview.textContent = '';
     }
+    $('clear').disabled = !has;
     MdRender.tally(stat, MdCount.count(text, opts()), '标记符号、链接地址和属性块不计。');
     try { localStorage.setItem(KEY, text); } catch (e) { /* 存不了就不存 */ }
   }
 
-  var timer;
-  src.addEventListener('input', function () { clearTimeout(timer); timer = setTimeout(update, 120); });
-  $('sample').addEventListener('click', function () { src.value = SAMPLE; update(); src.focus(); });
+  var timer, saved = null, undoTimer;
+  var undoBtn = $('undo-clear');
+  // 清空后保留 10 秒可撤销；一旦重新输入或载入示例，撤销就失效，免得盖掉新内容
+  function showUndo(on) {
+    clearTimeout(undoTimer);
+    undoBtn.hidden = !on;
+    if (!on) saved = null;
+    else undoTimer = setTimeout(function () { showUndo(false); }, 10000);
+  }
+  src.addEventListener('input', function () { showUndo(false); clearTimeout(timer); timer = setTimeout(update, 120); });
+  $('sample').addEventListener('click', function () { showUndo(false); src.value = SAMPLE; update(); src.focus(); });
+  $('clear').addEventListener('click', function () {
+    if (!src.value) return;
+    var prev = src.value;
+    src.value = '';
+    clearTimeout(timer);
+    update();
+    showUndo(true);
+    saved = prev;
+    src.focus();
+  });
+  undoBtn.addEventListener('click', function () {
+    if (saved === null) return;
+    src.value = saved;
+    showUndo(false);
+    update();
+    src.focus();
+  });
   try { src.value = localStorage.getItem(KEY) || ''; } catch (e) { /* 没有存档 */ }
 
   // 统计范围
