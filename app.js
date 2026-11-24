@@ -28,7 +28,12 @@
     return { includeCode: $('opt-code').checked, includeFrontmatter: $('opt-fm').checked, includeComments: $('opt-comment').checked };
   }
 
-  function update() {
+  function save() {
+    if (saved) return; /* 撤销期内不改写存档 */
+    try { localStorage.setItem(KEY, src.value); } catch (e) { /* 存不了就不存 */ }
+  }
+
+  function update(skipSave) {
     var text = src.value;
     var has = text.trim().length > 0;
     empty.hidden = has;
@@ -41,17 +46,23 @@
     }
     $('clear').disabled = !has;
     MdRender.tally(stat, MdCount.count(text, opts()), '标记符号、链接地址和属性块不计。');
-    try { localStorage.setItem(KEY, text); } catch (e) { /* 存不了就不存 */ }
+    if (!skipSave) save();
   }
 
   var timer, saved = null, undoTimer;
   var undoBtn = $('undo-clear');
   // 清空后保留 10 秒可撤销；一旦重新输入或载入示例，撤销就失效，免得盖掉新内容
+  function say(t) { $('clear-note').textContent = t; }
+  // 清空只清页面，存档要等撤销期结束才改写，期间刷新还能找回旧稿
   function showUndo(on) {
     clearTimeout(undoTimer);
+    if (!on && document.activeElement === undoBtn) src.focus();
     undoBtn.hidden = !on;
-    if (!on) saved = null;
-    else undoTimer = setTimeout(function () { showUndo(false); }, 10000);
+    if (!on) { saved = null; say(''); }
+    else {
+      say('已清空，10 秒内可以撤销。');
+      undoTimer = setTimeout(function () { showUndo(false); save(); }, 10000);
+    }
   }
   src.addEventListener('input', function () { showUndo(false); clearTimeout(timer); timer = setTimeout(update, 120); });
   $('sample').addEventListener('click', function () { showUndo(false); src.value = SAMPLE; update(); src.focus(); });
@@ -60,7 +71,7 @@
     var prev = src.value;
     src.value = '';
     clearTimeout(timer);
-    update();
+    update(true);
     showUndo(true);
     saved = prev;
     src.focus();
@@ -70,6 +81,7 @@
     src.value = saved;
     showUndo(false);
     update();
+    say('已恢复原文。');
     src.focus();
   });
   try { src.value = localStorage.getItem(KEY) || ''; } catch (e) { /* 没有存档 */ }

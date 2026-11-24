@@ -53,6 +53,7 @@ main { flex: 1; min-height: 0; display: flex; }
 .field__head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-sm); min-height: 32px; }
 .field__acts { display: flex; gap: var(--space-xs); }
 .btn--small { min-height: 32px; padding: 0 var(--space-sm); }
+.btn--small::before { inset: calc(-1 * var(--space-xs)) 0; }
 #src { flex: 1; width: 100%; min-height: 14rem; resize: none; padding: var(--space-md); border: 0; border-radius: var(--radius-card); background: var(--color-paper-2); color: var(--color-ink); font: 400 var(--text-md)/1.75 var(--font-body); tab-size: 4; outline: 2px solid transparent; outline-offset: -3px; }
 #src:focus-visible { outline-color: var(--color-focus); }
 #src::placeholder { color: var(--color-muted); }
